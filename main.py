@@ -9,6 +9,7 @@ pygame.time.set_timer(pygame.USEREVENT, randint(500, 1500))
 
 window = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("zOOOmbi")
+pygame.display.set_icon(pygame.image.load("titulimage.png"))
 clock = pygame.time.Clock()
 
 WHITE = (255, 255, 255)
@@ -37,15 +38,17 @@ def collide_enemy():
     for enemy in enemies:
         for bullet in bullets:
             if bullet.rect.colliderect(enemy.rect):
-                score += 1
-                enemy.kill()
+                enemy.health -= 100
                 bullet.kill()
+                if enemy.health <= 0:
+                    score += 1
+                    enemy.kill()
         if player.rect.collidepoint(enemy.rect.center):
             score -= 10
             enemy.kill()
 
 
-flUp = flDown = flLeft = flRight = False
+flDown = flLeft = flRight = False
 
 while 1:
     for event in pygame.event.get():
@@ -59,21 +62,19 @@ while 1:
             elif event.key == pygame.K_RIGHT:
                 flRight = True
             elif event.key == pygame.K_UP:
-                flUp = True
+                player.rect.top -= randint(100, 200)
             elif event.key == pygame.K_DOWN:
                 flDown = True
             elif event.key == pygame.K_SPACE:
                 create_bullet(bullets)
         elif event.type == pygame.KEYUP:
             if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, pygame.K_DOWN]:
-                flUp = flDown = flLeft = flRight = False
+                flDown = flLeft = flRight = False
 
     if flLeft:
         player.rect.left -= speed
     elif flRight:
         player.rect.right += speed
-    elif flUp:
-        player.rect.top -= randint(10, 30)
     elif flDown:
         player.rect.bottom += speed
 
