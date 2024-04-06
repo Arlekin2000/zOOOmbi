@@ -19,7 +19,7 @@ RED = (255, 0, 0)
 
 speed = 10
 score = 0
-max_score = 0
+level = 1
 
 background = pygame.transform.scale(pygame.image.load("roud.jpg"), (800, 600))
 player = Player()
@@ -27,8 +27,9 @@ enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
 def create_bullet(group):
+    global level
     a, b = player.rect.center
-    return Bullet(a + 50, b - 50, group)
+    return Bullet(a + 50, b - 50, level, group)
 
 def create_enemy(group):
     return Enemy(900, randint(400, 500), group)
@@ -38,8 +39,9 @@ def collide_enemy():
     for enemy in enemies:
         for bullet in bullets:
             if bullet.rect.colliderect(enemy.rect):
-                enemy.health -= 100
+                enemy.health -= bullet.damage
                 bullet.kill()
+                print(bullet.damage)
                 if enemy.health <= 0:
                     score += 1
                     enemy.kill()
@@ -47,12 +49,23 @@ def collide_enemy():
             score -= 10
             enemy.kill()
 
+def level_up():
+    global score, level
+    if score >= 100:
+        level = 2
+    if score >= 200:
+        level = 3
+    if score >= 300:
+        level = 4
+    if score >= 400:
+        level = 5
+
 
 flDown = flLeft = flRight = False
 
 while 1:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or score < 0:
             exit()
         elif event.type == pygame.USEREVENT:
             create_enemy(enemies)
@@ -90,15 +103,19 @@ while 1:
     if player.rect.right >= 800:
         player.rect.right = 800
 
-    text = pygame.font.SysFont(None, 48).render(f"Счет {score}", True, RED)
-    text_rect = text.get_rect()
+    text = pygame.font.SysFont("Baby Kruffy", 48).render(f"Score {score}", True, (0, 0, 0))
+    text_rect = text.get_rect(bottomright=(750, 580))
+    text_level = pygame.font.SysFont("Baby Kruffy", 48).render(f"Level {level}", True, RED)
+    text_level_rect = text_level.get_rect(center=(380, 30))
 
+    level_up()
     collide_enemy()
     window.blit(background, (0, 0))
-    window.blit(text, text_rect)
+    window.blit(text_level, text_level_rect)
     window.blit(player.image, player.rect)
     enemies.draw(window)
     bullets.draw(window)
+    window.blit(text, text_rect)
     pygame.display.update()
     enemies.update()
     bullets.update()
